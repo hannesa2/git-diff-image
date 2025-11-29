@@ -1,0 +1,31 @@
+name: build
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+env:
+  resourceRunID: ${{ github.run_id }}-${{ github.run_number }}
+
+jobs:
+  Build:
+    name: Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ Ubuntu-24.04 ]
+        prepare: [ sudo apt-get update && sudo apt-get install -y exiftool imagemagick xdg-utils libimage-exiftool-perl zsh jq xorg ]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          submodules: false
+      - name: Prepare Ubuntu environment
+        run: |
+          ${{ matrix.prepare }}
+
+      - name: Install git-diff-image
+        run: |
+          ./install.sh
