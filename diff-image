@@ -149,7 +149,7 @@ then
   exifdiff=$?
   set -e
 else
-  diff_clean_names "$f1" "$f2"
+  exifdiff=1
 fi
 
 if $exif_only
@@ -219,13 +219,29 @@ do_compare()
   fi
 }
 
+image_width() {
+    if which exiftool > /dev/null; then
+        exiftool -S -ImageWidth "$1" | cut -d' ' -f2
+    else
+        identify -format "%w" "$1[0]"
+    fi
+}
+
+image_height() {
+    if which exiftool > /dev/null; then
+        exiftool -S -ImageHeight "$1" | cut -d' ' -f2
+    else
+        identify -format "%h" "$1[0]"
+    fi
+}
+
 if which xdg-open > /dev/null
 then
     # Get width and height of each input image.
-    f1_width="$(exiftool -S -ImageWidth "$f1" | cut -d' ' -f2)"
-    f2_width="$(exiftool -S -ImageWidth "$f2" | cut -d' ' -f2)"
-    f1_height="$(exiftool -S -ImageHeight "$f1" | cut -d' ' -f2)"
-    f2_height="$(exiftool -S -ImageHeight "$f2" | cut -d' ' -f2)"
+    f1_width="$(image_width "$f1")"
+    f2_width="$(image_width "$f2")"
+    f1_height="$(image_height "$f1")"
+    f2_height="$(image_height "$f2")"
     # find the max of each.
     if (( $(echo "$f1_width > $f2_width" |bc -l) )); then
         max_file_width=$f1_width
